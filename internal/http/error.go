@@ -8,6 +8,16 @@ import (
 	"net/http"
 )
 
+// HTTP-коды ошибок, описанные в OpenAPI-спецификации.
+const (
+	errorCodeTeamExists  = "TEAM_EXISTS"
+	errorCodePRExists    = "PR_EXISTS"
+	errorCodePRMerged    = "PR_MERGED"
+	errorCodeNotAssigned = "NOT_ASSIGNED"
+	errorCodeNoCandidate = "NO_CANDIDATE"
+	errorCodeNotFound    = "NOT_FOUND"
+)
+
 // ErrorResponseBody описывает тело ошибки в формате ErrorResponse.
 type ErrorResponseBody struct {
 	Code    string `json:"code"`
