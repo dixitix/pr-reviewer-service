@@ -18,10 +18,11 @@ type TeamService interface {
 
 // UserService описывает операции над пользователями.
 type UserService interface {
-	// SetUserActive меняет флаг активности пользователя.
-	SetUserActive(ctx context.Context, userID domain.UserID, isActive bool) error
+	// SetUserActive меняет флаг активности пользователя и возвращает обновлённого пользователя.
+	SetUserActive(ctx context.Context, userID domain.UserID, isActive bool) (domain.User, error)
 
 	// GetUserReviewPullRequests возвращает список PR'ов, где пользователь выступает ревьювером.
+	// Если пользователь не найден, возвращается ErrNotFound.
 	GetUserReviewPullRequests(ctx context.Context, userID domain.UserID) ([]domain.PullRequest, error)
 }
 
