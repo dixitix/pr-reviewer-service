@@ -71,5 +71,46 @@ func (h *Handler) handleUserGetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO handling route
+	userIDParam := r.URL.Query().Get("user_id")
+	if userIDParam == "" {
+		http.Error(w, "user_id is required", http.StatusBadRequest)
+		return
+	}
+
+	ctx := r.Context()
+
+	if h.logger != nil {
+		h.logger.Printf("handleUserGetReview: user_id=%s", userIDParam)
+	}
+
+	prs, err := h.svc.GetUserReviewPullRequests(ctx, domain.UserID(userIDParam))
+	if err != nil && !errors.Is(err, service.ErrNotFound) {
+		if h.logger != nil {
+			h.logger.Printf("handleUserGetReview: GetUserReviewPullRequests error: %v", err)
+		}
+
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var prShort []PullRequestShortDTO
+	if err == nil {
+		prShort = mapPullRequestsToShortDTOs(prs)
+	} else {
+		prShort = []PullRequestShortDTO{}
+	}
+
+	resp := GetUserReviewResponse{
+		UserID:       userIDParam,
+		PullRequests: prShort,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		if h.logger != nil {
+			h.logger.Printf("handleUserGetReview: failed to write response: %v", err)
+		}
+	}
 }
