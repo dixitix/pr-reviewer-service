@@ -138,5 +138,70 @@ func (h *Handler) handlePullRequestReassign(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// TODO handling route
+	var req ReassignPullRequestRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		return
+	}
+
+	if req.PullRequestID == "" || req.OldUserID == "" {
+		http.Error(w, "pull_request_id and old_user_id are required", http.StatusBadRequest)
+		return
+	}
+
+	ctx := r.Context()
+
+	if h.logger != nil {
+		h.logger.Printf(
+			"handlePullRequestReassign: pr_id=%s old_user_id=%s",
+			req.PullRequestID,
+			req.OldUserID,
+		)
+	}
+
+	pr, newReviewerID, err := h.svc.ReassignReviewer(
+		ctx,
+		domain.PullRequestID(req.PullRequestID),
+		domain.UserID(req.OldUserID),
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrPullRequestMerged):
+			writeJSONError(w, http.StatusConflict, errorCodePRMerged, "pull request already merged")
+			return
+
+		case errors.Is(err, service.ErrReviewerNotAssigned):
+			writeJSONError(w, http.StatusConflict, errorCodeNotAssigned, "old_user_id is not assigned as reviewer")
+			return
+
+		case errors.Is(err, service.ErrNoCandidate):
+			writeJSONError(w, http.StatusConflict, errorCodeNoCandidate, "no candidate for reviewer reassignment")
+			return
+
+		case errors.Is(err, service.ErrNotFound):
+			writeJSONError(w, http.StatusNotFound, errorCodeNotFound, "pull request or user not found")
+			return
+
+		default:
+			if h.logger != nil {
+				h.logger.Printf("handlePullRequestReassign: ReassignReviewer error: %v", err)
+			}
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	resp := ReassignResponse{
+		PullRequest: mapPullRequestDomainToDTO(pr),
+		ReplacedBy:  string(newReviewerID),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		if h.logger != nil {
+			h.logger.Printf("handlePullRequestReassign: failed to write response: %v", err)
+		}
+	}
 }
