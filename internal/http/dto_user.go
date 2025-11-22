@@ -10,6 +10,11 @@ type UserDTO struct {
 	IsActive bool   `json:"is_active"`
 }
 
+// SetUserActiveResponse описывает ответ на /users/setIsActive.
+type SetUserActiveResponse struct {
+	User UserDTO `json:"user"`
+}
+
 // GetUserReviewResponse описывает ответ на запрос списка PR'ов пользователя-ревьювера.
 type GetUserReviewResponse struct {
 	UserID       string                `json:"user_id"`
