@@ -85,7 +85,50 @@ func (h *Handler) handlePullRequestMerge(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// TODO handling route
+	var req MergePullRequestRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		return
+	}
+
+	if req.PullRequestID == "" {
+		http.Error(w, "pull_request_id is required", http.StatusBadRequest)
+		return
+	}
+
+	ctx := r.Context()
+
+	if h.logger != nil {
+		h.logger.Printf("handlePullRequestMerge: pr_id=%s", req.PullRequestID)
+	}
+
+	pr, err := h.svc.MergePullRequest(ctx, domain.PullRequestID(req.PullRequestID))
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			writeJSONError(w, http.StatusNotFound, errorCodeNotFound, "pull request not found")
+			return
+		}
+
+		if h.logger != nil {
+			h.logger.Printf("handlePullRequestMerge: MergePullRequest error: %v", err)
+		}
+
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	resp := PullRequestEnvelope{
+		PullRequest: mapPullRequestDomainToDTO(pr),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		if h.logger != nil {
+			h.logger.Printf("handlePullRequestMerge: failed to write response: %v", err)
+		}
+	}
 }
 
 // handlePullRequestReassign обрабатывает переназначение ревьювера.
