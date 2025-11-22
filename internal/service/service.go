@@ -34,8 +34,8 @@ type PullRequestService interface {
 	// MergePullRequest выполняет идемпотентный merge PR.
 	MergePullRequest(ctx context.Context, id domain.PullRequestID) (domain.PullRequest, error)
 
-	// ReassignReviewer переназначает ревьювера по правилам из ТЗ.
-	ReassignReviewer(ctx context.Context, prID domain.PullRequestID, oldReviewerID domain.UserID) (domain.PullRequest, error)
+	// ReassignReviewer переназначает ревьювера и возвращает обновлённый PR и user_id нового ревьювера.
+	ReassignReviewer(ctx context.Context, prID domain.PullRequestID, oldReviewerID domain.UserID) (domain.PullRequest, domain.UserID, error)
 }
 
 // Service агрегирует все доменные сервисы.
