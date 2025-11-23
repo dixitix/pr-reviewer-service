@@ -1,6 +1,5 @@
-// Package httpserver содержит структуры данных и вспомогательные типы
-// для HTTP-слоя сервиса назначения ревьюеров.
-package httpserver
+// Package pullrequest содержит обработчики и DTO для работы с Pull Request'ами.
+package pullrequest
 
 import (
 	"time"
@@ -8,9 +7,9 @@ import (
 	"github.com/dixitix/pr-reviewer-service/internal/domain"
 )
 
-// mapPullRequestToShortDTO конвертирует доменный PR в укороченный HTTP-DTO.
-func mapPullRequestToShortDTO(pr domain.PullRequest) PullRequestShortDTO {
-	return PullRequestShortDTO{
+// mapPullRequestToShort конвертирует доменный PR в укороченный HTTP-DTO.
+func mapPullRequestToShort(pr domain.PullRequest) Short {
+	return Short{
 		PullRequestID:   string(pr.ID),
 		PullRequestName: pr.Name,
 		AuthorID:        string(pr.AuthorID),
@@ -18,17 +17,17 @@ func mapPullRequestToShortDTO(pr domain.PullRequest) PullRequestShortDTO {
 	}
 }
 
-// mapPullRequestsToShortDTOs конвертирует список доменных PR'ов в список укороченных DTO.
-func mapPullRequestsToShortDTOs(prs []domain.PullRequest) []PullRequestShortDTO {
-	result := make([]PullRequestShortDTO, len(prs))
+// MapPullRequestsToShort конвертирует список доменных PR'ов в список укороченных DTO.
+func MapPullRequestsToShort(prs []domain.PullRequest) []Short {
+	result := make([]Short, len(prs))
 	for i, pr := range prs {
-		result[i] = mapPullRequestToShortDTO(pr)
+		result[i] = mapPullRequestToShort(pr)
 	}
 	return result
 }
 
 // mapPullRequestDomainToDTO конвертирует доменный PR в полный HTTP-DTO.
-func mapPullRequestDomainToDTO(pr domain.PullRequest) PullRequestDTO {
+func mapPullRequestDomainToDTO(pr domain.PullRequest) DTO {
 	reviewers := make([]string, len(pr.AssignedReviewers))
 	for i, id := range pr.AssignedReviewers {
 		reviewers[i] = string(id)
@@ -46,7 +45,7 @@ func mapPullRequestDomainToDTO(pr domain.PullRequest) PullRequestDTO {
 		mergedAt = &t
 	}
 
-	return PullRequestDTO{
+	return DTO{
 		PullRequestID:     string(pr.ID),
 		PullRequestName:   pr.Name,
 		AuthorID:          string(pr.AuthorID),

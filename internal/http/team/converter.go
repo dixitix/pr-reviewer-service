@@ -1,11 +1,10 @@
-// Package httpserver содержит структуры данных и вспомогательные типы
-// для HTTP-слоя сервиса назначения ревьюеров.
-package httpserver
+// Package team содержит обработчики и DTO для работы с командами.
+package team
 
 import "github.com/dixitix/pr-reviewer-service/internal/domain"
 
 // mapTeamDTOToDomain конвертирует HTTP-DTO команды в доменную команду и её участников.
-func mapTeamDTOToDomain(dto TeamDTO) (domain.Team, []domain.User) {
+func mapTeamDTOToDomain(dto DTO) (domain.Team, []domain.User) {
 	team := domain.Team{
 		Name: domain.TeamName(dto.TeamName),
 	}
@@ -24,18 +23,18 @@ func mapTeamDTOToDomain(dto TeamDTO) (domain.Team, []domain.User) {
 }
 
 // mapTeamDomainToDTO конвертирует доменную команду и её участников в HTTP-DTO.
-func mapTeamDomainToDTO(team domain.Team, users []domain.User) TeamDTO {
-	members := make([]TeamMemberDTO, len(users))
+func mapTeamDomainToDTO(team domain.Team, users []domain.User) DTO {
+	members := make([]MemberDTO, len(users))
 
 	for i, u := range users {
-		members[i] = TeamMemberDTO{
+		members[i] = MemberDTO{
 			UserID:   string(u.ID),
 			Username: u.Username,
 			IsActive: u.IsActive,
 		}
 	}
 
-	return TeamDTO{
+	return DTO{
 		TeamName: string(team.Name),
 		Members:  members,
 	}

@@ -5,19 +5,24 @@ package httpserver
 import (
 	"log"
 
+	"github.com/dixitix/pr-reviewer-service/internal/http/pullrequest"
+	"github.com/dixitix/pr-reviewer-service/internal/http/team"
+	"github.com/dixitix/pr-reviewer-service/internal/http/user"
 	"github.com/dixitix/pr-reviewer-service/internal/service"
 )
 
-// Handler обрабатывает HTTP-запросы согласно OpenAPI-спецификации.
+// Handler агрегирует обработчики HTTP-запросов.
 type Handler struct {
-	svc    service.Service
-	logger *log.Logger
+	teamHandler        *team.Handler
+	userHandler        *user.Handler
+	pullRequestHandler *pullrequest.Handler
 }
 
 // NewHandler создаёт новый HTTP-обработчик.
 func NewHandler(svc service.Service, logger *log.Logger) *Handler {
 	return &Handler{
-		svc:    svc,
-		logger: logger,
+		teamHandler:        team.NewHandler(svc, logger),
+		userHandler:        user.NewHandler(svc, logger),
+		pullRequestHandler: pullrequest.NewHandler(svc, logger),
 	}
 }

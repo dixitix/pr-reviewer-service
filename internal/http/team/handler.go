@@ -1,24 +1,39 @@
-// Package httpserver содержит структуры данных и вспомогательные типы
-// для HTTP-слоя сервиса назначения ревьюеров.
-package httpserver
+// Package team содержит обработчики и DTO для работы с командами.
+package team
 
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/dixitix/pr-reviewer-service/internal/domain"
+	"github.com/dixitix/pr-reviewer-service/internal/http/httperr"
 	"github.com/dixitix/pr-reviewer-service/internal/service"
 )
 
-// handleTeamAdd обрабатывает создание новой команды и её участников.
-func (h *Handler) handleTeamAdd(w http.ResponseWriter, r *http.Request) {
+// Handler обрабатывает HTTP-запросы, связанные с командами.
+type Handler struct {
+	svc    service.TeamService
+	logger *log.Logger
+}
+
+// NewHandler создаёт новый обработчик команд.
+func NewHandler(svc service.TeamService, logger *log.Logger) *Handler {
+	return &Handler{
+		svc:    svc,
+		logger: logger,
+	}
+}
+
+// Add обрабатывает создание новой команды и её участников.
+func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var req TeamDTO
+	var req DTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid JSON body", http.StatusBadRequest)
 		return
@@ -47,12 +62,12 @@ func (h *Handler) handleTeamAdd(w http.ResponseWriter, r *http.Request) {
 	err := h.svc.CreateTeam(ctx, team.Name, members)
 	if err != nil {
 		if errors.Is(err, service.ErrTeamAlreadyExists) {
-			writeJSONError(w, http.StatusBadRequest, errorCodeTeamExists, "team_name already exists")
+			httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeTeamExists, "team_name already exists", h.logger)
 			return
 		}
 
 		if errors.Is(err, service.ErrNotFound) {
-			writeJSONError(w, http.StatusNotFound, errorCodeNotFound, "resource not found")
+			httperr.WriteJSONError(w, http.StatusNotFound, httperr.ErrorCodeNotFound, "resource not found", h.logger)
 			return
 		}
 
@@ -65,7 +80,7 @@ func (h *Handler) handleTeamAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := GetTeamResponse{
-		Team: TeamDTO{
+		Team: DTO{
 			TeamName: req.TeamName,
 			Members:  req.Members,
 		},
@@ -81,8 +96,8 @@ func (h *Handler) handleTeamAdd(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleTeamGet обрабатывает получение информации о команде.
-func (h *Handler) handleTeamGet(w http.ResponseWriter, r *http.Request) {
+// Get обрабатывает получение информации о команде.
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -98,7 +113,7 @@ func (h *Handler) handleTeamGet(w http.ResponseWriter, r *http.Request) {
 	team, members, err := h.svc.GetTeam(ctx, domain.TeamName(teamNameParam))
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
-			writeJSONError(w, http.StatusNotFound, errorCodeNotFound, "team not found")
+			httperr.WriteJSONError(w, http.StatusNotFound, httperr.ErrorCodeNotFound, "team not found", h.logger)
 			return
 		}
 

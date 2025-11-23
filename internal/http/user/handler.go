@@ -1,18 +1,34 @@
-// Package httpserver содержит структуры данных и вспомогательные типы
-// для HTTP-слоя сервиса назначения ревьюеров.
-package httpserver
+// Package user содержит обработчики и DTO для работы с пользователями.
+package user
 
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/dixitix/pr-reviewer-service/internal/domain"
+	"github.com/dixitix/pr-reviewer-service/internal/http/httperr"
+	"github.com/dixitix/pr-reviewer-service/internal/http/pullrequest"
 	"github.com/dixitix/pr-reviewer-service/internal/service"
 )
 
-// handleUserSetIsActive обрабатывает изменение активности пользователя.
-func (h *Handler) handleUserSetIsActive(w http.ResponseWriter, r *http.Request) {
+// Handler обрабатывает HTTP-запросы, связанные с пользователями.
+type Handler struct {
+	svc    service.UserService
+	logger *log.Logger
+}
+
+// NewHandler создаёт обработчик пользователей.
+func NewHandler(svc service.UserService, logger *log.Logger) *Handler {
+	return &Handler{
+		svc:    svc,
+		logger: logger,
+	}
+}
+
+// SetIsActive обрабатывает изменение активности пользователя.
+func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -38,7 +54,7 @@ func (h *Handler) handleUserSetIsActive(w http.ResponseWriter, r *http.Request) 
 	user, err := h.svc.SetUserActive(ctx, domain.UserID(req.UserID), req.IsActive)
 	if err != nil {
 		if errors.Is(err, service.ErrNotFound) {
-			writeJSONError(w, http.StatusNotFound, errorCodeNotFound, "user not found")
+			httperr.WriteJSONError(w, http.StatusNotFound, httperr.ErrorCodeNotFound, "user not found", h.logger)
 			return
 		}
 
@@ -64,8 +80,8 @@ func (h *Handler) handleUserSetIsActive(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// handleUserGetReview обрабатывает получение списка PR'ов,
-func (h *Handler) handleUserGetReview(w http.ResponseWriter, r *http.Request) {
+// GetReview обрабатывает получение списка PR'ов пользователя-ревьювера.
+func (h *Handler) GetReview(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -93,11 +109,11 @@ func (h *Handler) handleUserGetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var prShort []PullRequestShortDTO
+	var prShort []pullrequest.Short
 	if err == nil {
-		prShort = mapPullRequestsToShortDTOs(prs)
+		prShort = pullrequest.MapPullRequestsToShort(prs)
 	} else {
-		prShort = []PullRequestShortDTO{}
+		prShort = []pullrequest.Short{}
 	}
 
 	resp := GetUserReviewResponse{
