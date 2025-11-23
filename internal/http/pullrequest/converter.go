@@ -36,7 +36,7 @@ func mapPullRequestDomainToDTO(pr domain.PullRequest) DTO {
 	var createdAt *time.Time
 	if !pr.CreatedAt.IsZero() {
 		t := pr.CreatedAt
-		createdAt = &t
+		createdAt = t
 	}
 
 	var mergedAt *time.Time
