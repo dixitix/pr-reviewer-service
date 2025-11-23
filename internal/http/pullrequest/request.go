@@ -1,12 +1,5 @@
-// Package httpserver содержит структуры данных и вспомогательные типы
-// для HTTP-слоя сервиса назначения ревьюеров.
-package httpserver
-
-// SetUserActiveRequest описывает тело запроса /users/setIsActive.
-type SetUserActiveRequest struct {
-	UserID   string `json:"user_id"`
-	IsActive bool   `json:"is_active"`
-}
+// Package pullrequest содержит обработчики и DTO для работы с Pull Request'ами.
+package pullrequest
 
 // CreatePullRequestRequest описывает тело запроса /pullRequest/create.
 type CreatePullRequestRequest struct {

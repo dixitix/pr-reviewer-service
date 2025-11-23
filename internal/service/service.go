@@ -1,4 +1,4 @@
-// Package service описывает интерфейсы бизнес-логики сервиса назначения ревьюеров.
+// Package service описывает интерфейсы и доменные ошибки бизнес-логики сервиса назначения ревьюеров.
 package service
 
 import (
@@ -18,10 +18,11 @@ type TeamService interface {
 
 // UserService описывает операции над пользователями.
 type UserService interface {
-	// SetUserActive меняет флаг активности пользователя.
-	SetUserActive(ctx context.Context, userID domain.UserID, isActive bool) error
+	// SetUserActive меняет флаг активности пользователя и возвращает обновлённого пользователя.
+	SetUserActive(ctx context.Context, userID domain.UserID, isActive bool) (domain.User, error)
 
 	// GetUserReviewPullRequests возвращает список PR'ов, где пользователь выступает ревьювером.
+	// Если пользователь не найден, возвращается ErrNotFound.
 	GetUserReviewPullRequests(ctx context.Context, userID domain.UserID) ([]domain.PullRequest, error)
 }
 
@@ -33,8 +34,8 @@ type PullRequestService interface {
 	// MergePullRequest выполняет идемпотентный merge PR.
 	MergePullRequest(ctx context.Context, id domain.PullRequestID) (domain.PullRequest, error)
 
-	// ReassignReviewer переназначает ревьювера по правилам из ТЗ.
-	ReassignReviewer(ctx context.Context, prID domain.PullRequestID, oldReviewerID domain.UserID) (domain.PullRequest, error)
+	// ReassignReviewer переназначает ревьювера и возвращает обновлённый PR и user_id нового ревьювера.
+	ReassignReviewer(ctx context.Context, prID domain.PullRequestID, oldReviewerID domain.UserID) (domain.PullRequest, domain.UserID, error)
 }
 
 // Service агрегирует все доменные сервисы.
