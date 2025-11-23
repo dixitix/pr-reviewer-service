@@ -1,4 +1,4 @@
-// Package repository содержит интерфейсы доступа к хранилищу данных
+// Package repository содержит интерфейсы и ошибки доступа к хранилищу данных
 package repository
 
 import (
