@@ -30,7 +30,7 @@ func NewHandler(svc service.UserService, logger *log.Logger) *Handler {
 // SetIsActive обрабатывает изменение активности пользователя.
 func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		httperr.WriteJSONError(w, http.StatusMethodNotAllowed, httperr.ErrorCodeMethodNotAllowed, "method not allowed", h.logger)
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 // GetReview обрабатывает получение списка PR'ов пользователя-ревьювера.
 func (h *Handler) GetReview(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		httperr.WriteJSONError(w, http.StatusMethodNotAllowed, httperr.ErrorCodeMethodNotAllowed, "method not allowed", h.logger)
 		return
 	}
 

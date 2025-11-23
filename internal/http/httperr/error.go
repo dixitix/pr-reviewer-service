@@ -9,12 +9,13 @@ import (
 
 // HTTP-коды ошибок.
 const (
-	ErrorCodeTeamExists  = "TEAM_EXISTS"
-	ErrorCodePRExists    = "PR_EXISTS"
-	ErrorCodePRMerged    = "PR_MERGED"
-	ErrorCodeNotAssigned = "NOT_ASSIGNED"
-	ErrorCodeNoCandidate = "NO_CANDIDATE"
-	ErrorCodeNotFound    = "NOT_FOUND"
+	ErrorCodeTeamExists       = "TEAM_EXISTS"
+	ErrorCodePRExists         = "PR_EXISTS"
+	ErrorCodePRMerged         = "PR_MERGED"
+	ErrorCodeNotAssigned      = "NOT_ASSIGNED"
+	ErrorCodeNoCandidate      = "NO_CANDIDATE"
+	ErrorCodeMethodNotAllowed = "METHOD_NOT_ALLOWED"
+	ErrorCodeNotFound         = "NOT_FOUND"
 )
 
 // ErrorResponseBody описывает тело ошибки в формате ErrorResponse.

@@ -29,7 +29,7 @@ func NewHandler(svc service.TeamService, logger *log.Logger) *Handler {
 // Add обрабатывает создание новой команды и её участников.
 func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		httperr.WriteJSONError(w, http.StatusMethodNotAllowed, httperr.ErrorCodeMethodNotAllowed, "method not allowed", h.logger)
 		return
 	}
 
@@ -99,7 +99,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 // Get обрабатывает получение информации о команде.
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		httperr.WriteJSONError(w, http.StatusMethodNotAllowed, httperr.ErrorCodeMethodNotAllowed, "method not allowed", h.logger)
 		return
 	}
 

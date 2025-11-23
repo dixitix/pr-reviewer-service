@@ -29,7 +29,7 @@ func NewHandler(svc service.PullRequestService, logger *log.Logger) *Handler {
 // Create обрабатывает создание нового PR.
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		httperr.WriteJSONError(w, http.StatusMethodNotAllowed, httperr.ErrorCodeMethodNotAllowed, "method not allowed", h.logger)
 		return
 	}
 
@@ -85,7 +85,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 // Merge обрабатывает merge PR.
 func (h *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		httperr.WriteJSONError(w, http.StatusMethodNotAllowed, httperr.ErrorCodeMethodNotAllowed, "method not allowed", h.logger)
 		return
 	}
 
@@ -138,7 +138,7 @@ func (h *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 // Reassign обрабатывает переназначение ревьювера.
 func (h *Handler) Reassign(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		httperr.WriteJSONError(w, http.StatusMethodNotAllowed, httperr.ErrorCodeMethodNotAllowed, "method not allowed", h.logger)
 		return
 	}
 
