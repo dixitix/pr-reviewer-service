@@ -35,12 +35,12 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var req CreatePullRequestRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeInvalidJSON, "invalid JSON body", h.logger)
 		return
 	}
 
 	if req.PullRequestID == "" || req.PullRequestName == "" || req.AuthorID == "" {
-		http.Error(w, "pull_request_id, pull_request_name and author_id are required", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "pull_request_id, pull_request_name and author_id are required", h.logger)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 			if h.logger != nil {
 				h.logger.Error("handlePullRequestCreate: CreatePullRequest error", slog.Any("error", err))
 			}
-			http.Error(w, "internal server error", http.StatusInternalServerError)
+			httperr.WriteJSONError(w, http.StatusInternalServerError, httperr.ErrorCodeInternal, "internal server error", h.logger)
 			return
 		}
 	}
@@ -95,12 +95,12 @@ func (h *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 
 	var req MergePullRequestRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeInvalidJSON, "invalid JSON body", h.logger)
 		return
 	}
 
 	if req.PullRequestID == "" {
-		http.Error(w, "pull_request_id is required", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "pull_request_id is required", h.logger)
 		return
 	}
 
@@ -121,7 +121,7 @@ func (h *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error("handlePullRequestMerge: MergePullRequest error", slog.Any("error", err))
 		}
 
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httperr.WriteJSONError(w, http.StatusInternalServerError, httperr.ErrorCodeInternal, "internal server error", h.logger)
 		return
 	}
 
@@ -148,12 +148,12 @@ func (h *Handler) Reassign(w http.ResponseWriter, r *http.Request) {
 
 	var req ReassignPullRequestRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeInvalidJSON, "invalid JSON body", h.logger)
 		return
 	}
 
 	if req.PullRequestID == "" || req.OldUserID == "" {
-		http.Error(w, "pull_request_id and old_user_id are required", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "pull_request_id and old_user_id are required", h.logger)
 		return
 	}
 
@@ -186,7 +186,7 @@ func (h *Handler) Reassign(w http.ResponseWriter, r *http.Request) {
 			if h.logger != nil {
 				h.logger.Error("handlePullRequestReassign: ReassignReviewer error", slog.Any("error", err))
 			}
-			http.Error(w, "internal server error", http.StatusInternalServerError)
+			httperr.WriteJSONError(w, http.StatusInternalServerError, httperr.ErrorCodeInternal, "internal server error", h.logger)
 			return
 		}
 	}
