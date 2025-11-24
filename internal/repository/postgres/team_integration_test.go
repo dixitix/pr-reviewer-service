@@ -15,20 +15,16 @@ import (
 )
 
 // newTeamRepo подготавливает чистую тестовую базу и репозиторий команд.
-func newTeamRepo(t *testing.T) (*sql.DB, repository.TeamRepository) {
-	t.Helper()
-
+func newTestTeamRepository(t *testing.T) (*sql.DB, repository.TeamRepository) {
 	db := openTestDB(t)
 	truncateAllTables(t, db)
 
-	repo := postgres.NewTeamRepository(db)
-
-	return db, repo
+	return db, postgres.NewTeamRepository(db)
 }
 
 // TestTeamRepository_CreateAndGet проверяет создание команды и получение ее участников.
 func TestTeamRepository_CreateAndGet(t *testing.T) {
-	_, repo := newTeamRepo(t)
+	_, repo := newTestTeamRepository(t)
 
 	ctx := context.Background()
 
