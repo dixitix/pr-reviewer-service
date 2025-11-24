@@ -94,6 +94,7 @@ func (r *PullRequestRepository) GetByID(
 	err := row.Scan(
 		&pr.ID,
 		&pr.Name,
+		&pr.AuthorID,
 		&statusValue,
 		&pr.CreatedAt,
 		&pr.MergedAt,

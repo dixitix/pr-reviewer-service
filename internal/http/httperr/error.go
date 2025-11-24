@@ -3,7 +3,7 @@ package httperr
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -30,8 +30,8 @@ type ErrorResponse struct {
 }
 
 // WriteJSONError отправляет ответ об ошибке в формате ErrorResponse.
-// Ошибка записи логируется через переданный логгер, при его отсутствии используется стандартный лог.
-func WriteJSONError(w http.ResponseWriter, statusCode int, code, message string, logger *log.Logger) {
+// Ошибка записи логируется через переданный логгер, при его отсутствии используется slog.Default().
+func WriteJSONError(w http.ResponseWriter, statusCode int, code, message string, logger *slog.Logger) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 
@@ -44,10 +44,10 @@ func WriteJSONError(w http.ResponseWriter, statusCode int, code, message string,
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if logger != nil {
-			logger.Printf("failed to write error response: %v", err)
+			logger.Error("failed to write error response", slog.Any("error", err))
 			return
 		}
 
-		log.Printf("failed to write error response: %v", err)
+		slog.Default().Error("failed to write error response", slog.Any("error", err))
 	}
 }

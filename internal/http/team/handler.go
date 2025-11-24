@@ -4,7 +4,7 @@ package team
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/dixitix/pr-reviewer-service/internal/domain"
@@ -15,11 +15,11 @@ import (
 // Handler обрабатывает HTTP-запросы, связанные с командами.
 type Handler struct {
 	svc    service.TeamService
-	logger *log.Logger
+	logger *slog.Logger
 }
 
 // NewHandler создаёт новый обработчик команд.
-func NewHandler(svc service.TeamService, logger *log.Logger) *Handler {
+func NewHandler(svc service.TeamService, logger *slog.Logger) *Handler {
 	return &Handler{
 		svc:    svc,
 		logger: logger,
@@ -56,7 +56,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if h.logger != nil {
-		h.logger.Printf("handleTeamAdd: creating team %s with %d member(s)", req.TeamName, len(req.Members))
+		h.logger.Info("handleTeamAdd: creating team", slog.String("team_name", req.TeamName), slog.Int("members_count", len(req.Members)))
 	}
 
 	err := h.svc.CreateTeam(ctx, team.Name, members)
@@ -72,7 +72,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if h.logger != nil {
-			h.logger.Printf("handleTeamAdd: CreateTeam error: %v", err)
+			h.logger.Error("handleTeamAdd: CreateTeam error", slog.Any("error", err))
 		}
 
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -91,7 +91,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if h.logger != nil {
-			h.logger.Printf("handleTeamAdd: failed to write response: %v", err)
+			h.logger.Error("handleTeamAdd: failed to write response", slog.Any("error", err))
 		}
 	}
 }
@@ -118,7 +118,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if h.logger != nil {
-			h.logger.Printf("handleTeamGet: GetTeam error: %v", err)
+			h.logger.Error("handleTeamGet: GetTeam error", slog.Any("error", err))
 		}
 
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -132,7 +132,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if h.logger != nil {
-			h.logger.Printf("handleTeamGet: failed to write response: %v", err)
+			h.logger.Error("handleTeamGet: failed to write response", slog.Any("error", err))
 		}
 	}
 }

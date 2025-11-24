@@ -3,7 +3,7 @@
 package httpserver
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/dixitix/pr-reviewer-service/internal/http/pullrequest"
 	"github.com/dixitix/pr-reviewer-service/internal/http/team"
@@ -19,7 +19,7 @@ type Handler struct {
 }
 
 // NewHandler создаёт новый HTTP-обработчик.
-func NewHandler(svc service.Service, logger *log.Logger) *Handler {
+func NewHandler(svc service.Service, logger *slog.Logger) *Handler {
 	return &Handler{
 		teamHandler:        team.NewHandler(svc, logger),
 		userHandler:        user.NewHandler(svc, logger),
