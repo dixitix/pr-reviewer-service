@@ -1,70 +1,24 @@
 //go:build integration
 
-// Package postgres_test содержит интеграционные тесты репозитория команд.
+// Package postgres_test содержит интеграционные тесты репозиториев.
 package postgres_test
 
 import (
 	"context"
 	"database/sql"
-	"os"
 	"sort"
 	"testing"
-	"time"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/dixitix/pr-reviewer-service/internal/domain"
 	"github.com/dixitix/pr-reviewer-service/internal/repository"
 	"github.com/dixitix/pr-reviewer-service/internal/repository/postgres"
 )
 
-// newTestDB создает подключение к тестовой базе данных и проверяет доступность.
-func newTestDB(t *testing.T) *sql.DB {
-	t.Helper()
-
-	dsn := os.Getenv("TEST_DATABASE_DSN")
-	if dsn == "" {
-		dsn = "postgres://pr_reviewer:pr_reviewer@localhost:5432/pr_reviewer_test?sslmode=disable"
-	}
-
-	db, err := sql.Open("pgx", dsn)
-	if err != nil {
-		t.Fatalf("open db: %v", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := db.PingContext(ctx); err != nil {
-		_ = db.Close()
-		t.Fatalf("ping db: %v", err)
-	}
-
-	return db
-}
-
-// truncateAllTables очищает все таблицы тестовой базы.
-func truncateAllTables(t *testing.T, db *sql.DB) {
-	t.Helper()
-
-	_, err := db.Exec(`
-		TRUNCATE TABLE
-			pull_request_reviewers,
-			pull_requests,
-			users,
-			teams
-		RESTART IDENTITY CASCADE;
-	`)
-	if err != nil {
-		t.Fatalf("truncate tables: %v", err)
-	}
-}
-
 // newTeamRepo подготавливает чистую тестовую базу и репозиторий команд.
 func newTeamRepo(t *testing.T) (*sql.DB, repository.TeamRepository) {
 	t.Helper()
 
-	db := newTestDB(t)
+	db := openTestDB(t)
 	truncateAllTables(t, db)
 
 	repo := postgres.NewTeamRepository(db)
@@ -74,8 +28,7 @@ func newTeamRepo(t *testing.T) (*sql.DB, repository.TeamRepository) {
 
 // TestTeamRepository_CreateAndGet проверяет создание команды и получение ее участников.
 func TestTeamRepository_CreateAndGet(t *testing.T) {
-	db, repo := newTeamRepo(t)
-	defer db.Close()
+	_, repo := newTeamRepo(t)
 
 	ctx := context.Background()
 
