@@ -1,7 +1,5 @@
-//go:build integration
-
 // Package postgres_test содержит интеграционные тесты репозиториев.
-package postgres_test
+package integration
 
 import (
 	"context"
