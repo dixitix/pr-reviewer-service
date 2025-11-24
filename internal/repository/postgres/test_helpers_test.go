@@ -61,3 +61,33 @@ func truncateAllTables(t *testing.T, db *sql.DB) {
 		t.Fatalf("truncate tables: %v", err)
 	}
 }
+
+// insertTeam добавляет тестовую команду в БД.
+func insertTeam(t *testing.T, db *sql.DB, name string) {
+	t.Helper()
+
+	const query = `INSERT INTO teams (name) VALUES ($1);`
+
+	if _, err := db.Exec(query, name); err != nil {
+		t.Fatalf("insert team %s: %v", name, err)
+	}
+}
+
+// insertUser добавляет тестового пользователя в БД.
+func insertUser(
+	t *testing.T,
+	db *sql.DB,
+	id, username, teamName string,
+	isActive bool,
+) {
+	t.Helper()
+
+	const query = `
+		INSERT INTO users (id, username, team_name, is_active)
+		VALUES ($1, $2, $3, $4);
+	`
+
+	if _, err := db.Exec(query, id, username, teamName, isActive); err != nil {
+		t.Fatalf("insert user %s: %v", id, err)
+	}
+}
