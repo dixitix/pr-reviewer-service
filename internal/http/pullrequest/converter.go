@@ -34,7 +34,7 @@ func mapPullRequestDomainToDTO(pr domain.PullRequest) DTO {
 	}
 
 	var createdAt *time.Time
-	if !pr.CreatedAt.IsZero() {
+	if pr.CreatedAt != nil && !pr.CreatedAt.IsZero() {
 		t := pr.CreatedAt
 		createdAt = t
 	}
