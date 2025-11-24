@@ -4,7 +4,7 @@ package user
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/dixitix/pr-reviewer-service/internal/domain"
@@ -16,11 +16,11 @@ import (
 // Handler обрабатывает HTTP-запросы, связанные с пользователями.
 type Handler struct {
 	svc    service.UserService
-	logger *log.Logger
+	logger *slog.Logger
 }
 
 // NewHandler создаёт обработчик пользователей.
-func NewHandler(svc service.UserService, logger *log.Logger) *Handler {
+func NewHandler(svc service.UserService, logger *slog.Logger) *Handler {
 	return &Handler{
 		svc:    svc,
 		logger: logger,
@@ -48,7 +48,7 @@ func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if h.logger != nil {
-		h.logger.Printf("handleUserSetIsActive: user_id=%s is_active=%v", req.UserID, req.IsActive)
+		h.logger.Info("handleUserSetIsActive", slog.String("user_id", req.UserID), slog.Bool("is_active", req.IsActive))
 	}
 
 	user, err := h.svc.SetUserActive(ctx, domain.UserID(req.UserID), req.IsActive)
@@ -59,7 +59,7 @@ func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if h.logger != nil {
-			h.logger.Printf("handleUserSetIsActive: SetUserActive error: %v", err)
+			h.logger.Error("handleUserSetIsActive: SetUserActive error", slog.Any("error", err))
 		}
 
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -75,7 +75,7 @@ func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if h.logger != nil {
-			h.logger.Printf("handleUserSetIsActive: failed to write response: %v", err)
+			h.logger.Error("handleUserSetIsActive: failed to write response", slog.Any("error", err))
 		}
 	}
 }
@@ -96,13 +96,13 @@ func (h *Handler) GetReview(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if h.logger != nil {
-		h.logger.Printf("handleUserGetReview: user_id=%s", userIDParam)
+		h.logger.Info("handleUserGetReview", slog.String("user_id", userIDParam))
 	}
 
 	prs, err := h.svc.GetUserReviewPullRequests(ctx, domain.UserID(userIDParam))
 	if err != nil && !errors.Is(err, service.ErrNotFound) {
 		if h.logger != nil {
-			h.logger.Printf("handleUserGetReview: GetUserReviewPullRequests error: %v", err)
+			h.logger.Error("handleUserGetReview: GetUserReviewPullRequests error", slog.Any("error", err))
 		}
 
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -126,7 +126,7 @@ func (h *Handler) GetReview(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if h.logger != nil {
-			h.logger.Printf("handleUserGetReview: failed to write response: %v", err)
+			h.logger.Error("handleUserGetReview: failed to write response", slog.Any("error", err))
 		}
 	}
 }

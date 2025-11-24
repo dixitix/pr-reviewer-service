@@ -4,7 +4,7 @@ package pullrequest
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/dixitix/pr-reviewer-service/internal/domain"
@@ -15,11 +15,11 @@ import (
 // Handler обрабатывает HTTP-запросы, связанные с Pull Request'ами.
 type Handler struct {
 	svc    service.PullRequestService
-	logger *log.Logger
+	logger *slog.Logger
 }
 
 // NewHandler создаёт обработчик для Pull Request-эндпоинтов.
-func NewHandler(svc service.PullRequestService, logger *log.Logger) *Handler {
+func NewHandler(svc service.PullRequestService, logger *slog.Logger) *Handler {
 	return &Handler{
 		svc:    svc,
 		logger: logger,
@@ -47,7 +47,11 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if h.logger != nil {
-		h.logger.Printf("handlePullRequestCreate: pr_id=%s author_id=%s", req.PullRequestID, req.AuthorID)
+		h.logger.Info(
+			"handlePullRequestCreate",
+			slog.String("pull_request_id", req.PullRequestID),
+			slog.String("author_id", req.AuthorID),
+		)
 	}
 
 	pr, err := h.svc.CreatePullRequest(ctx, domain.PullRequestID(req.PullRequestID), req.PullRequestName, domain.UserID(req.AuthorID))
@@ -61,7 +65,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			if h.logger != nil {
-				h.logger.Printf("handlePullRequestCreate: CreatePullRequest error: %v", err)
+				h.logger.Error("handlePullRequestCreate: CreatePullRequest error", slog.Any("error", err))
 			}
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
@@ -77,7 +81,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if h.logger != nil {
-			h.logger.Printf("handlePullRequestCreate: failed to write response: %v", err)
+			h.logger.Error("handlePullRequestCreate: failed to write response", slog.Any("error", err))
 		}
 	}
 }
@@ -103,7 +107,7 @@ func (h *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if h.logger != nil {
-		h.logger.Printf("handlePullRequestMerge: pr_id=%s", req.PullRequestID)
+		h.logger.Info("handlePullRequestMerge", slog.String("pull_request_id", req.PullRequestID))
 	}
 
 	pr, err := h.svc.MergePullRequest(ctx, domain.PullRequestID(req.PullRequestID))
@@ -114,7 +118,7 @@ func (h *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if h.logger != nil {
-			h.logger.Printf("handlePullRequestMerge: MergePullRequest error: %v", err)
+			h.logger.Error("handlePullRequestMerge: MergePullRequest error", slog.Any("error", err))
 		}
 
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -130,7 +134,7 @@ func (h *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if h.logger != nil {
-			h.logger.Printf("handlePullRequestMerge: failed to write response: %v", err)
+			h.logger.Error("handlePullRequestMerge: failed to write response", slog.Any("error", err))
 		}
 	}
 }
@@ -156,7 +160,11 @@ func (h *Handler) Reassign(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if h.logger != nil {
-		h.logger.Printf("handlePullRequestReassign: pr_id=%s old_user_id=%s", req.PullRequestID, req.OldUserID)
+		h.logger.Info(
+			"handlePullRequestReassign",
+			slog.String("pull_request_id", req.PullRequestID),
+			slog.String("old_user_id", req.OldUserID),
+		)
 	}
 
 	pr, newReviewerID, err := h.svc.ReassignReviewer(ctx, domain.PullRequestID(req.PullRequestID), domain.UserID(req.OldUserID))
@@ -176,7 +184,7 @@ func (h *Handler) Reassign(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			if h.logger != nil {
-				h.logger.Printf("handlePullRequestReassign: ReassignReviewer error: %v", err)
+				h.logger.Error("handlePullRequestReassign: ReassignReviewer error", slog.Any("error", err))
 			}
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
@@ -193,7 +201,7 @@ func (h *Handler) Reassign(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		if h.logger != nil {
-			h.logger.Printf("handlePullRequestReassign: failed to write response: %v", err)
+			h.logger.Error("handlePullRequestReassign: failed to write response", slog.Any("error", err))
 		}
 	}
 }
