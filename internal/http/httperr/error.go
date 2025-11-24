@@ -14,6 +14,9 @@ const (
 	ErrorCodePRMerged         = "PR_MERGED"
 	ErrorCodeNotAssigned      = "NOT_ASSIGNED"
 	ErrorCodeNoCandidate      = "NO_CANDIDATE"
+	ErrorCodeInvalidJSON      = "INVALID_JSON"
+	ErrorCodeValidation       = "VALIDATION_ERROR"
+	ErrorCodeInternal         = "INTERNAL_ERROR"
 	ErrorCodeMethodNotAllowed = "METHOD_NOT_ALLOWED"
 	ErrorCodeNotFound         = "NOT_FOUND"
 )

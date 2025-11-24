@@ -35,18 +35,18 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 
 	var req DTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeInvalidJSON, "invalid JSON body", h.logger)
 		return
 	}
 
 	if req.TeamName == "" {
-		http.Error(w, "team_name is required", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "team_name is required", h.logger)
 		return
 	}
 
 	for _, m := range req.Members {
 		if m.UserID == "" || m.Username == "" {
-			http.Error(w, "member.user_id and member.username are required", http.StatusBadRequest)
+			httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "member.user_id and member.username are required", h.logger)
 			return
 		}
 	}
@@ -75,7 +75,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error("handleTeamAdd: CreateTeam error", slog.Any("error", err))
 		}
 
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httperr.WriteJSONError(w, http.StatusInternalServerError, httperr.ErrorCodeInternal, "internal server error", h.logger)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	teamNameParam := r.URL.Query().Get("team_name")
 	if teamNameParam == "" {
-		http.Error(w, "team_name is required", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "team_name is required", h.logger)
 		return
 	}
 
@@ -121,7 +121,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error("handleTeamGet: GetTeam error", slog.Any("error", err))
 		}
 
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httperr.WriteJSONError(w, http.StatusInternalServerError, httperr.ErrorCodeInternal, "internal server error", h.logger)
 		return
 	}
 

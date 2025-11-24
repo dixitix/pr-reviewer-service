@@ -36,12 +36,12 @@ func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 
 	var req SetUserActiveRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeInvalidJSON, "invalid JSON body", h.logger)
 		return
 	}
 
 	if req.UserID == "" {
-		http.Error(w, "user_id is required", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "user_id is required", h.logger)
 		return
 	}
 
@@ -62,7 +62,7 @@ func (h *Handler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error("handleUserSetIsActive: SetUserActive error", slog.Any("error", err))
 		}
 
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httperr.WriteJSONError(w, http.StatusInternalServerError, httperr.ErrorCodeInternal, "internal server error", h.logger)
 		return
 	}
 
@@ -89,7 +89,7 @@ func (h *Handler) GetReview(w http.ResponseWriter, r *http.Request) {
 
 	userIDParam := r.URL.Query().Get("user_id")
 	if userIDParam == "" {
-		http.Error(w, "user_id is required", http.StatusBadRequest)
+		httperr.WriteJSONError(w, http.StatusBadRequest, httperr.ErrorCodeValidation, "user_id is required", h.logger)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h *Handler) GetReview(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error("handleUserGetReview: GetUserReviewPullRequests error", slog.Any("error", err))
 		}
 
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httperr.WriteJSONError(w, http.StatusInternalServerError, httperr.ErrorCodeInternal, "internal server error", h.logger)
 		return
 	}
 
