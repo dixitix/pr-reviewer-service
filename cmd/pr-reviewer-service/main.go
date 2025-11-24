@@ -18,6 +18,8 @@ import (
 	"github.com/dixitix/pr-reviewer-service/internal/logger"
 	"github.com/dixitix/pr-reviewer-service/internal/repository/postgres"
 	"github.com/dixitix/pr-reviewer-service/internal/service"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 // main - точка входа в сервис назначения ревьюеров.
