@@ -1,4 +1,4 @@
-.PHONY: run fmt tidy lint test migrate-test e2e migrate-up migrate-down compose-up compose-down
+.PHONY: run fmt tidy lint test migrate-test e2e migrate-up migrate-down compose-up compose-down load-test
 
 MIGRATIONS_DIR := ./migrations
 MIGRATE        ?= migrate
@@ -29,6 +29,13 @@ e2e:
 		trap '$(E2E_COMPOSE) down -v --remove-orphans' EXIT; \
 		$(E2E_COMPOSE) up -d --build --remove-orphans; \
 		go test ./test/e2e -count=1
+
+load-test:
+	@set -e; \
+		$(COMPOSE) up -d --build; \
+		./test/load/reset_db_loadtest.sh; \
+		python3 test/load/seed_loadtest_data.py; \
+		locust -f test/load/locustfile.py
 
 compose-up:
 	$(COMPOSE) up -d --build
