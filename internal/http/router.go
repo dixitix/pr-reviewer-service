@@ -13,4 +13,6 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/pullRequest/create", h.pullRequestHandler.Create)
 	mux.HandleFunc("/pullRequest/merge", h.pullRequestHandler.Merge)
 	mux.HandleFunc("/pullRequest/reassign", h.pullRequestHandler.Reassign)
+	mux.HandleFunc("/stats/byUser", h.statsHandler.AssignmentsByUser)
+	mux.HandleFunc("/stats/byPullRequest", h.statsHandler.AssignmentsByPullRequest)
 }
