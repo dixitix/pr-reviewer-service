@@ -24,7 +24,9 @@ func newTestPullRequestRepository(t *testing.T) (*sql.DB, repository.PullRequest
 // TestPullRequestRepository_CreateAndGet проверяет успешное создание и получение pull request.
 func TestPullRequestRepository_CreateAndGet(t *testing.T) {
 	db, repo := newTestPullRequestRepository(t)
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	ctx := context.Background()
 
@@ -94,7 +96,9 @@ func TestPullRequestRepository_CreateAndGet(t *testing.T) {
 // TestPullRequestRepository_Update убеждается, что обновление полей pull request сохраняется.
 func TestPullRequestRepository_Update(t *testing.T) {
 	db, repo := newTestPullRequestRepository(t)
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	ctx := context.Background()
 
@@ -158,7 +162,9 @@ func TestPullRequestRepository_Update(t *testing.T) {
 // TestPullRequestRepository_Update_NotFound проверяет, что обновление несуществующего pull request возвращает ErrNotFound.
 func TestPullRequestRepository_Update_NotFound(t *testing.T) {
 	db, repo := newTestPullRequestRepository(t)
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	ctx := context.Background()
 
@@ -178,7 +184,9 @@ func TestPullRequestRepository_Update_NotFound(t *testing.T) {
 // TestPullRequestRepository_ListByReviewer убеждается, что репозиторий возвращает все pull request для ревьюера.
 func TestPullRequestRepository_ListByReviewer(t *testing.T) {
 	db, repo := newTestPullRequestRepository(t)
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	ctx := context.Background()
 
