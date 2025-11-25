@@ -148,7 +148,9 @@ func (r *TeamRepository) UpsertMembers(
 		return fmt.Errorf("begin tx for upsert members of team %s: %w", teamName, err)
 	}
 	defer func() {
-		_ = tx.Rollback()
+		if err != nil {
+			_ = tx.Rollback()
+		}
 	}()
 
 	const query = `
