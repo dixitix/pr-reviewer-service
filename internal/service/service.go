@@ -38,9 +38,31 @@ type PullRequestService interface {
 	ReassignReviewer(ctx context.Context, prID domain.PullRequestID, oldReviewerID domain.UserID) (domain.PullRequest, domain.UserID, error)
 }
 
+// StatsService описывает операции получения статистики назначений.
+type StatsService interface {
+	// GetAssignmentsByUser возвращает количество назначений по каждому пользователю.
+	GetAssignmentsByUser(ctx context.Context) (map[domain.UserID]int, error)
+
+	// GetAssignmentsByPullRequest возвращает количество назначений по каждому Pull Request.
+	GetAssignmentsByPullRequest(ctx context.Context) (map[domain.PullRequestID]int, error)
+}
+
+// UserAssignmentStat описывает количество назначений по пользователям.
+type UserAssignmentStat struct {
+	UserID      domain.UserID
+	Assignments int
+}
+
+// PullRequestAssignmentStat описывает количество назначений по PR.
+type PullRequestAssignmentStat struct {
+	PullRequestID domain.PullRequestID
+	Assignments   int
+}
+
 // Service агрегирует все доменные сервисы.
 type Service interface {
 	TeamService
 	UserService
 	PullRequestService
+	StatsService
 }
