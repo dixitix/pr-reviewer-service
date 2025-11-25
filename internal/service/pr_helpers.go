@@ -17,9 +17,11 @@ func (s *service) pickReviewersForNewPR(
 		ids[i] = u.ID
 	}
 
+	s.rndMu.Lock()
 	s.rnd.Shuffle(len(ids), func(i, j int) {
 		ids[i], ids[j] = ids[j], ids[i]
 	})
+	s.rndMu.Unlock()
 
 	if len(ids) <= limit {
 		return ids
