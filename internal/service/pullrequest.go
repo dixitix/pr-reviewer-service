@@ -156,9 +156,11 @@ func (s *service) ReassignReviewer(
 		return domain.PullRequest{}, "", ErrNoCandidate
 	}
 
+	s.rndMu.Lock()
 	s.rnd.Shuffle(len(candidates), func(i, j int) {
 		candidates[i], candidates[j] = candidates[j], candidates[i]
 	})
+	s.rndMu.Unlock()
 
 	newReviewerID := candidates[0]
 

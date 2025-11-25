@@ -3,6 +3,7 @@ package service
 
 import (
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/dixitix/pr-reviewer-service/internal/repository"
@@ -14,7 +15,8 @@ type service struct {
 	userRepo        repository.UserRepository
 	pullRequestRepo repository.PullRequestRepository
 
-	rnd *rand.Rand
+	rndMu sync.Mutex
+	rnd   *rand.Rand
 }
 
 // NewService создаёт новый экземпляр Service.
