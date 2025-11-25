@@ -48,4 +48,10 @@ type PullRequestRepository interface {
 
 	// ListByReviewer возвращает PR'ы, где пользователь является ревьювером.
 	ListByReviewer(ctx context.Context, reviewerID domain.UserID) ([]domain.PullRequest, error)
+
+	// CountAssignmentsByReviewer возвращает количество назначений по каждому ревьюверу.
+	CountAssignmentsByReviewer(ctx context.Context) (map[domain.UserID]int, error)
+
+	// CountAssignmentsByPullRequest возвращает количество ревьюверов по каждому PR.
+	CountAssignmentsByPullRequest(ctx context.Context) (map[domain.PullRequestID]int, error)
 }

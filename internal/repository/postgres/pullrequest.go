@@ -305,3 +305,85 @@ func (r *PullRequestRepository) ListByReviewer(
 
 	return result, nil
 }
+
+// CountAssignmentsByReviewer возвращает количество назначений по каждому ревьюверу.
+func (r *PullRequestRepository) CountAssignmentsByReviewer(
+	ctx context.Context,
+) (map[domain.UserID]int, error) {
+	const query = `
+		SELECT reviewer_id, COUNT(*) AS assignments
+		FROM pull_request_reviewers
+		GROUP BY reviewer_id
+		ORDER BY reviewer_id
+	`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("count assignments by reviewer: %w", err)
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	result := make(map[domain.UserID]int)
+
+	for rows.Next() {
+		var (
+			reviewerID string
+			count      int
+		)
+
+		if err := rows.Scan(&reviewerID, &count); err != nil {
+			return nil, fmt.Errorf("scan assignments by reviewer: %w", err)
+		}
+
+		result[domain.UserID(reviewerID)] = count
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate assignments by reviewer: %w", err)
+	}
+
+	return result, nil
+}
+
+// CountAssignmentsByPullRequest возвращает количество ревьюверов по каждому PR.
+func (r *PullRequestRepository) CountAssignmentsByPullRequest(
+	ctx context.Context,
+) (map[domain.PullRequestID]int, error) {
+	const query = `
+		SELECT pull_request_id, COUNT(*) AS reviewers
+		FROM pull_request_reviewers
+		GROUP BY pull_request_id
+		ORDER BY pull_request_id
+	`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("count assignments by pull request: %w", err)
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	result := make(map[domain.PullRequestID]int)
+
+	for rows.Next() {
+		var (
+			prID  string
+			count int
+		)
+
+		if err := rows.Scan(&prID, &count); err != nil {
+			return nil, fmt.Errorf("scan assignments by pull request: %w", err)
+		}
+
+		result[domain.PullRequestID(prID)] = count
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate assignments by pull request: %w", err)
+	}
+
+	return result, nil
+}
