@@ -7,6 +7,7 @@ tags:
   - name: Teams
   - name: Users
   - name: PullRequests
+  - name: Stats
   - name: Health
 
 components:
@@ -120,6 +121,24 @@ components:
         status:
           type: string
           enum: [OPEN, MERGED]
+    UserAssignmentStat:
+      type: object
+      required: [ user_id, assignments ]
+      properties:
+        user_id:
+          type: string
+        assignments:
+          type: integer
+          format: int64
+    PullRequestAssignmentStat:
+      type: object
+      required: [ pull_request_id, assignments ]
+      properties:
+        pull_request_id:
+          type: string
+        assignments:
+          type: integer
+          format: int64
 
 paths:
   /team/add:
@@ -419,3 +438,57 @@ paths:
                     pull_request_name: Add search
                     author_id: u1
                     status: OPEN
+
+  /stats/byUser:
+    get:
+      tags: [Stats]
+      summary: Получить количество назначений по пользователям
+      responses:
+        '200':
+          description: Количество назначений по каждому user_id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserAssignmentStat'
+              example:
+                stats:
+                  - user_id: u1
+                    assignments: 2
+                  - user_id: u2
+                    assignments: 1
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /stats/byPullRequest:
+    get:
+      tags: [Stats]
+      summary: Получить количество назначений по Pull Request
+      responses:
+        '200':
+          description: Количество назначений по каждому pull_request_id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PullRequestAssignmentStat'
+              example:
+                stats:
+                  - pull_request_id: pr-1001
+                    assignments: 2
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
