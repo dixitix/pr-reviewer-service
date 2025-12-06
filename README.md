@@ -9,13 +9,6 @@
 ## Как запускать
 - `make compose-up` — поднимет Postgres, применит миграции и запустит сервис на `http://localhost:8080`.
 
-## Локальная разработка без Docker
-- Поднимите локальный PostgreSQL (создайте БД `pr_reviewer` и пользователя, например `pr_reviewer`/`pr_reviewer`).
-- Экспортируйте `DATABASE_DSN=postgres://pr_reviewer:pr_reviewer@localhost:5432/pr_reviewer?sslmode=disable` (опционально `HTTP_ADDR=:8080`).
-- Настройки пула через `DB_*`: `DB_MAX_OPEN_CONNS` (дефолт 10), `DB_MAX_IDLE_CONNS` (5), `DB_CONN_MAX_LIFETIME` (5m).
-- Примените миграции: `make migrate-up` (требуется установленный CLI `migrate`) или прогоните SQL из `./migrations` любым способом.
-- Запускайте сервис: `make run`.
-
 ## Как тестировать
 - `make test` — интеграционные тесты репозитория
 - `make e2e` — e2e тесты на отдельном docker-compose окружении
@@ -84,6 +77,3 @@ curl "http://localhost:8080/users/getReview?user_id=u2"
 curl http://localhost:8080/stats/byUser
 curl http://localhost:8080/stats/byPullRequest
 ```
-
-## Допущения при работе
-- В OpenAPI для `/pullRequest/reassign` в примере указан `old_reviewer_id`, а в схеме — `old_user_id`; я ориентировалась на `old_user_id` как на источник истины.
